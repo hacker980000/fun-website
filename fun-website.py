@@ -344,6 +344,7 @@ def run_server():
     port = int(os.getenv("PORT", 8080))  # Render-এর PORT ভ্যারিয়েবল ব্যবহার করুন, ডিফল্ট 8080
     server_address = ('0.0.0.0', port)  # Render-এর জন্য '0.0.0.0' ব্যবহার করুন
     httpd = HTTPServer(server_address, FunHandler)
+    print(f"[DEBUG] Starting server on port {port}...")  # ডিবাগিং লগ
     print(f"মজার ওয়েবসাইট চালু হয়েছে পোর্ট {port} এ")
     httpd.serve_forever()
 
