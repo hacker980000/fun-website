@@ -3,6 +3,7 @@ import random
 import string
 import urllib.parse
 from urllib.parse import parse_qs, urlparse
+import os  # এনভায়রনমেন্ট ভ্যারিয়েবলের জন্য
 
 # গুগল সাইটের লিংক
 SUCCESS_REDIRECT_URL = "https://sites.google.com/view/top6premium-apk-download/home"
@@ -13,7 +14,12 @@ def generate_random_string(length=10):
     return ''.join(random.choice(letters) for _ in range(length))
 
 # কাস্টম URL তৈরি
-def create_fun_url(base_url="http://localhost:8080"):
+def create_fun_url(base_url=None):
+    if base_url is None:
+        # Render-এর ক্ষেত্রে আমরা base_url হিসেবে Render-এর URL ব্যবহার করব
+        base_url = os.getenv("RENDER_EXTERNAL_URL", "http://localhost:8080")
+        if not base_url:
+            base_url = "http://localhost:8080"  # ফলব্যাক
     fun_path = f"play-{generate_random_string()}"
     fake_params = {
         "game": "guess-number",
@@ -294,10 +300,11 @@ class FunHandler(BaseHTTPRequestHandler):
                 ).encode("utf-8"))
 
 # সার্ভার চালু করা
-def run_server(port=8080):
-    server_address = ('', port)
+def run_server():
+    port = int(os.getenv("PORT", 8080))  # Render-এর PORT ভ্যারিয়েবল ব্যবহার করুন, ডিফল্ট 8080
+    server_address = ('0.0.0.0', port)  # Render-এর জন্য '0.0.0.0' ব্যবহার করুন
     httpd = HTTPServer(server_address, FunHandler)
-    print(f"মজার ওয়েবসাইট চালু হয়েছে http://localhost:{port} এ")
+    print(f"মজার ওয়েবসাইট চালু হয়েছে পোর্ট {port} এ")
     httpd.serve_forever()
 
 # প্রধান ফাংশন
