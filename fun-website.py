@@ -213,6 +213,16 @@ class FunHandler(BaseHTTPRequestHandler):
         random.shuffle(options)
         return options
 
+    def do_HEAD(self):
+        # HEAD রিকোয়েস্টের জন্য
+        parsed_path = urlparse(self.path)
+        path = parsed_path.path
+
+        if path == "/":
+            self.send_response(200)
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+
     def do_GET(self):
         parsed_path = urlparse(self.path)
         path = parsed_path.path
