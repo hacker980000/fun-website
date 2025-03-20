@@ -342,17 +342,25 @@ class FunHandler(BaseHTTPRequestHandler):
 # সার্ভার চালু করা
 def run_server():
     port = int(os.getenv("PORT", 8080))  # Render-এর PORT ভ্যারিয়েবল ব্যবহার করুন, ডিফল্ট 8080
+    print(f"[DEBUG] Using port: {port}")  # ডিবাগিং লগ
     server_address = ('0.0.0.0', port)  # Render-এর জন্য '0.0.0.0' ব্যবহার করুন
-    httpd = HTTPServer(server_address, FunHandler)
-    print(f"[DEBUG] Starting server on port {port}...")  # ডিবাগিং লগ
-    print(f"মজার ওয়েবসাইট চালু হয়েছে পোর্ট {port} এ")
-    httpd.serve_forever()
+    try:
+        httpd = HTTPServer(server_address, FunHandler)
+        print(f"[DEBUG] Starting server on port {port}...")  # ডিবাগিং লগ
+        print(f"মজার ওয়েবসাইট চালু হয়েছে পোর্ট {port} এ")
+        httpd.serve_forever()
+    except Exception as e:
+        print(f"[ERROR] Failed to start server: {str(e)}")  # এরর লগ
+        raise
 
 # প্রধান ফাংশন
 if __name__ == "__main__":
+    print("[DEBUG] Starting application...")  # ডিবাগিং লগ
     fun_url = create_fun_url()
     print(f"তৈরি করা মজার URL: {fun_url}")
     try:
         run_server()
     except KeyboardInterrupt:
         print("\nসার্ভার বন্ধ করা হয়েছে।")
+    except Exception as e:
+        print(f"[ERROR] Application failed to start: {str(e)}")  # এরর লগ
