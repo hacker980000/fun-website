@@ -152,7 +152,7 @@ require(workflow_path.exists(), "Android GitHub build workflow must exist")
 for required in [
     "actions/checkout@v4",
     "actions/setup-java@v4",
-    "android-actions/setup-android@v3",
+    "android-actions/setup-android@v4",
     "gradle/actions/setup-gradle@v4",
     "gradle-version: '9.6.0'",
     "bootstrap_gradle_wrapper.sh",
