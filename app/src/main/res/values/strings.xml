@@ -116,7 +116,7 @@
     <string name="developer_whatsapp">WhatsApp: 01770921730</string>
     <string name="developer_phone">Phone: 01770921730</string>
     <string name="theme_key_boundary_toggle">Key Boundary</string>
-    <string name="theme_key_boundary_hint">Each keyboard theme remembers its own key boundary setting. Off keeps alphabetic keys clean and borderless; On restores the theme&apos;s key surface.</string>
+    <string name="theme_key_boundary_hint">Each keyboard theme remembers its own key boundary setting. Off keeps alphabetic keys clean and borderless; On restores the theme key surface.</string>
     <string name="theme_bubble_effect_toggle">Bubble Effect</string>
     <string name="theme_bubble_effect_hint">Each keyboard theme remembers its own Bubble Effect setting. Off disables the flight animation; On uses the selected Soft, Normal, or Playful style.</string>
     <string name="theme_bubble_style_label">Bubble Style</string>
