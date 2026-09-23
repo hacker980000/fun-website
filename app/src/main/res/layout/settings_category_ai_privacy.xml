@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_category_section"
+    style="@style/SettingsSectionCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView style="@style/SettingsSectionTitle" android:text="AI &amp; Privacy" />
+    <TextView style="@style/SettingsSectionSubtitle" android:text="Control AI data processing, conversation context, prompts and local AI customization." />
+
+    <CheckBox android:id="@+id/ai_privacy_consent_checkbox" style="@style/SettingsCheckBox" android:text="Allow Privacy/Data processing for AI generation" />
+    <CheckBox android:id="@+id/preserve_draft_checkbox" style="@style/SettingsCheckBox" android:text="Preserve my draft when inserting AI text" />
+    <Button android:id="@+id/button_save_ai_privacy_consent" style="@style/SettingsActionButton" android:text="Save AI privacy settings" />
+    <TextView android:id="@+id/status_ai_tone" style="@style/SetupStatusRow" android:text="@string/ai_tone_status_default" />
+
+    <TextView style="@style/SettingsSectionSubtitle" android:layout_marginTop="12dp" android:text="AI Context Access" android:textStyle="bold" />
+    <TextView android:id="@+id/status_context_access" style="@style/SetupStatusRow" android:text="@string/status_context_access" />
+    <CheckBox android:id="@+id/context_consent_checkbox" style="@style/SettingsCheckBox" android:text="I agree to AI Context Access" />
+    <Button android:id="@+id/button_context_access" style="@style/SettingsSecondaryButton" android:text="Enable AI Context Access" />
+    <Button android:id="@+id/button_disable_context_access" style="@style/SettingsSecondaryButton" android:text="Disable AI Context Access" />
+
+    <TextView style="@style/SettingsSectionSubtitle" android:layout_marginTop="14dp" android:text="Custom Prompt" android:textStyle="bold" />
+    <EditText
+        android:id="@+id/input_custom_instruction"
+        style="@style/SettingsInput"
+        android:gravity="top|start"
+        android:hint="Example: Keep replies short, natural and warm."
+        android:importantForAutofill="no"
+        android:inputType="textCapSentences|textMultiLine"
+        android:maxLength="1200"
+        android:maxLines="5"
+        android:minLines="2" />
+    <Button android:id="@+id/button_save_custom_instruction" style="@style/SettingsSecondaryButton" android:text="Save Custom Prompt" />
+    <Button android:id="@+id/button_clear_custom_instruction" style="@style/SettingsSecondaryButton" android:text="Clear Custom Prompt" />
+
+    <TextView style="@style/SettingsSectionSubtitle" android:layout_marginTop="14dp" android:text="Personal AI Training" android:textStyle="bold" />
+    <EditText
+        android:id="@+id/input_personal_training"
+        style="@style/SettingsInput"
+        android:gravity="top|start"
+        android:hint="Example: I prefer short natural Bengali replies with light emoji."
+        android:importantForAutofill="no"
+        android:inputType="textCapSentences|textMultiLine"
+        android:maxLength="1800"
+        android:maxLines="6"
+        android:minLines="3" />
+    <Button android:id="@+id/button_save_personal_training" style="@style/SettingsSecondaryButton" android:text="Save Personal AI Training" />
+    <Button android:id="@+id/button_clear_personal_training" style="@style/SettingsSecondaryButton" android:text="Clear Personal AI Training" />
+
+    <Button android:id="@+id/button_caption" style="@style/SettingsSecondaryButton" android:text="Write Caption / Photo Caption" />
+    <Button android:id="@+id/button_privacy_data" style="@style/SettingsSecondaryButton" android:text="Privacy, data use &amp; local history" />
+</LinearLayout>

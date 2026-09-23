@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_category_section"
+    style="@style/SettingsSectionCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView style="@style/SettingsSectionTitle" android:text="Language &amp; Input" />
+    <TextView style="@style/SettingsSectionSubtitle" android:text="Supported layouts: English, বাংলা, Phonetic and Bijoy. Use the keyboard language controls to switch layouts while typing." />
+    <CheckBox android:id="@+id/english_suggestions_checkbox" style="@style/SettingsCheckBox" android:text="English suggestions and next-word prediction" />
+    <CheckBox android:id="@+id/english_autocorrect_checkbox" style="@style/SettingsCheckBox" android:text="Conservative English autocorrect on Space" />
+    <CheckBox android:id="@+id/smart_language_hints_checkbox" style="@style/SettingsCheckBox" android:text="Smart Bangla ↔ English suggestion hints (tap to switch)" />
+</LinearLayout>

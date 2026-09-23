@@ -1,0 +1,22 @@
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]
+service = (ROOT/'app/src/main/java/com/socialaiassistant/keyboard/ime/SocialAiInputMethodService.kt').read_text()
+renderer = (ROOT/'app/src/main/java/com/socialaiassistant/keyboard/ime/BubbleKeyEffectRenderer.kt').read_text()
+models = (ROOT/'app/src/main/java/com/socialaiassistant/keyboard/ime/BubbleFlightModels.kt').read_text()
+checks = []
+def req(name, ok): checks.append((name, bool(ok)))
+req('cursor mapper exists', (ROOT/'app/src/main/java/com/socialaiassistant/keyboard/ime/BubbleCursorAnchorMapper.kt').exists())
+req('tap coordinator exists', (ROOT/'app/src/main/java/com/socialaiassistant/keyboard/ime/BubbleFlightTapCoordinator.kt').exists())
+req('prepared model', 'data class PreparedBubbleFlight' in models)
+req('renderer screen-source API', 'fun showLocal(sourceScreen: BubbleFlightPoint' in renderer)
+req('source center capture', 'view.getLocationOnScreen(location)' in service and 'location[0] + view.width / 2f' in service and 'location[1] + view.height / 2f' in service)
+req('commit then dispatch seam', 'bubbleFlightTapCoordinator.commitThenDispatch(prepared)' in service)
+req('cursor callback', 'override fun onUpdateCursorAnchorInfo' in service and 'BubbleCursorAnchorMapper.map(info)' in service)
+req('cursor monitor request', 'requestBubbleCursorUpdates()' in service and 'CURSOR_UPDATE_FILTER_INSERTION_MARKER' in service)
+req('generation stored', 'generation = bubbleEditorGeneration' in service)
+req('local fallback', 'bubbleKeyRenderer?.showLocal(request.source, request.spec, request.theme)' in service)
+req('old maybeShow removed', 'private fun maybeShowBubbleKey' not in service)
+req('lifecycle cancel', 'BubbleFlightBus.cancelAll()' in service and 'BubbleFlightBus.cancelEditor' in service)
+for n,o in checks: print(('PASS' if o else 'FAIL')+': '+n)
+print(f"Stage 24.1 Task 2 contract: {sum(o for _,o in checks)}/{len(checks)} PASS")
+if not all(o for _,o in checks): raise SystemExit(1)

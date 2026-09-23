@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_category_section"
+    style="@style/SettingsSectionCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView style="@style/SettingsSectionTitle" android:text="Keyboard Setup" />
+    <TextView style="@style/SettingsSectionSubtitle" android:text="Enable Social AI Keyboard in Android, then choose it as your active keyboard." />
+    <TextView android:id="@+id/status_keyboard_enabled" style="@style/SetupStatusRow" android:text="@string/status_keyboard_enabled" />
+    <TextView android:id="@+id/status_current_keyboard" style="@style/SetupStatusRow" android:text="@string/status_current_keyboard" />
+    <Button android:id="@+id/button_keyboard_settings" style="@style/SettingsActionButton" android:text="@string/open_keyboard_settings" />
+    <Button android:id="@+id/button_choose_keyboard" style="@style/SettingsSecondaryButton" android:text="@string/choose_keyboard" />
+</LinearLayout>

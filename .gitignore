@@ -1,0 +1,6 @@
+.worktrees/
+.superpowers/
+*.jks
+*.keystore
+keystore.properties
+local.properties

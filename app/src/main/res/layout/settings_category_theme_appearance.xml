@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_category_section"
+    style="@style/SettingsSectionCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView style="@style/SettingsSectionTitle" android:text="Theme &amp; Appearance" />
+    <TextView style="@style/SettingsSectionSubtitle" android:text="Choose complete theme packages and customize the active keyboard theme without changing your saved preferences in other themes." />
+
+    <TextView android:id="@+id/status_theme_name" style="@style/SetupStatusRow" android:text="Current keyboard theme: —" />
+    <Button android:id="@+id/button_theme_settings" style="@style/SettingsActionButton" android:text="@string/customize_keyboard_theme" />
+
+    <TextView android:id="@+id/status_settings_theme_category" style="@style/SetupStatusRow" android:text="Settings theme: —" />
+    <Button android:id="@+id/button_settings_theme" style="@style/SettingsSecondaryButton" android:text="Change Settings Theme" />
+
+    <CheckBox
+        android:id="@+id/number_row_checkbox"
+        style="@style/SettingsCheckBox"
+        android:text="Show number row on alphabetic layouts — English, বাংলা, Phonetic &amp; Bijoy" />
+    <TextView style="@style/SettingsSectionSubtitle" android:text="Number Row is global. The dedicated 123 number pad is unchanged." />
+
+    <CheckBox android:id="@+id/key_boundary_checkbox" style="@style/SettingsCheckBox" android:text="@string/theme_key_boundary_toggle" />
+    <TextView style="@style/SettingsSectionSubtitle" android:text="@string/theme_key_boundary_hint" />
+
+    <CheckBox android:id="@+id/bubble_key_checkbox" style="@style/SettingsCheckBox" android:text="@string/theme_bubble_effect_toggle" />
+    <TextView style="@style/SettingsSectionSubtitle" android:text="@string/theme_bubble_effect_hint" />
+    <TextView android:id="@+id/status_bubble_key_intensity" style="@style/SetupStatusRow" android:text="Bubble Effect style: Normal" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <Button android:id="@+id/button_bubble_soft" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="Soft" />
+        <Button android:id="@+id/button_bubble_normal" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="Normal" />
+        <Button android:id="@+id/button_bubble_playful" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="Playful" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/status_one_handed_mode" style="@style/SetupStatusRow" android:text="One-handed mode: Off" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <Button android:id="@+id/button_one_hand_left" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="Left" />
+        <Button android:id="@+id/button_one_hand_off" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="Off" />
+        <Button android:id="@+id/button_one_hand_right" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="Right" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/status_keyboard_height" style="@style/SetupStatusRow" android:text="Keyboard height: 50dp" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <Button android:id="@+id/button_height_compact" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="Compact" />
+        <Button android:id="@+id/button_height_normal" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="Normal" />
+        <Button android:id="@+id/button_height_tall" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="Tall" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_category_section"
+    style="@style/SettingsSectionCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView style="@style/SettingsSectionTitle" android:text="Account &amp; Subscription" />
+    <TextView style="@style/SettingsSectionSubtitle" android:text="Managed account, product access, usage, gateway and optional Personal OpenRouter." />
+
+    <TextView android:id="@+id/status_managed_account" style="@style/SetupStatusRow" android:text="Managed account: Not logged in" />
+    <TextView android:id="@+id/status_keyboard_product" style="@style/SetupStatusRow" android:text="Social AI Keyboard: —" />
+    <TextView android:id="@+id/status_assistant_product" style="@style/SetupStatusRow" android:text="AI Assistant Pro: —" />
+    <TextView android:id="@+id/status_usage" style="@style/SetupStatusRow" android:text="Usage: —" />
+    <TextView android:id="@+id/status_gateway" style="@style/SetupStatusRow" android:text="Gateway: Managed AI" />
+
+    <Button android:id="@+id/button_login_managed" style="@style/SettingsActionButton" android:text="Login / Switch Account" />
+    <Button android:id="@+id/button_refresh_account" style="@style/SettingsSecondaryButton" android:text="Refresh Account &amp; Usage" />
+    <Button android:id="@+id/button_account_portal" style="@style/SettingsSecondaryButton" android:text="Open Account / Payment / Device Portal" />
+    <Button android:id="@+id/button_use_managed" style="@style/SettingsSecondaryButton" android:text="Use Managed AI" />
+    <Button android:id="@+id/button_logout_managed" style="@style/SettingsSecondaryButton" android:text="Logout" />
+
+    <Button android:id="@+id/button_toggle_advanced_ai" style="@style/SettingsSecondaryButton" android:text="Advanced AI ▾" />
+    <LinearLayout
+        android:id="@+id/advanced_ai_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView style="@style/SettingsSectionSubtitle" android:text="Optional Personal OpenRouter" android:textStyle="bold" />
+        <TextView android:id="@+id/status_personal_api" style="@style/SetupStatusRow" android:text="@string/status_personal_api" />
+        <EditText
+            android:id="@+id/input_api_key"
+            style="@style/SettingsInput"
+            android:hint="@string/api_key_hint"
+            android:importantForAutofill="no"
+            android:inputType="textPassword"
+            android:maxLines="1" />
+        <Button android:id="@+id/button_save_api_key" style="@style/SettingsSecondaryButton" android:text="@string/save_api_key" />
+        <Button android:id="@+id/button_test_api_key" style="@style/SettingsSecondaryButton" android:text="@string/test_api_key" />
+        <Button android:id="@+id/button_clear_api_key" style="@style/SettingsSecondaryButton" android:text="@string/clear_api_key" />
+        <Button android:id="@+id/button_use_personal" style="@style/SettingsSecondaryButton" android:text="Use Personal OpenRouter" />
+        <Button android:id="@+id/button_managed_ai" style="@style/SettingsSecondaryButton" android:text="Managed AI v35.3.1" android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

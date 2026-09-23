@@ -1,0 +1,290 @@
+<!doctype html>
+
+<html lang="bn">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>
+    Social AI Assistant Pro
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="popup.css"
+  >
+
+</head>
+
+
+<body>
+
+<main class="card">
+
+
+  <header class="header">
+
+    <div
+      class="icon-badge"
+      aria-hidden="true"
+    >
+      AI
+    </div>
+
+
+    <div class="title-group">
+
+      <h1>
+        Social AI Assistant Pro
+        <span id="version"></span>
+      </h1>
+
+      <p>
+        Smart comments • sender-aware inbox replies • media context
+      </p>
+
+    </div>
+
+  </header>
+
+
+  <section class="section">
+
+    <label
+      class="field-label"
+      for="apiKey"
+    >
+      OpenRouter API Key
+    </label>
+
+
+    <div class="key-row">
+
+      <input
+        type="password"
+        id="apiKey"
+        placeholder="sk-or-v1-..."
+        autocomplete="off"
+        spellcheck="false"
+      >
+
+
+      <button
+        type="button"
+        class="small-btn"
+        id="toggleKey"
+        aria-label="Show API key"
+      >
+        Show
+      </button>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="small-btn full-btn"
+      id="testKey"
+    >
+      Test API Key
+    </button>
+
+
+    <p class="hint">
+      API key শুধু extension-এর trusted storage/service-worker context-এ ব্যবহৃত হয়। Facebook content script সরাসরি key পড়তে পারে না।
+    </p>
+
+  </section>
+
+
+  <section class="section grid-2">
+
+    <div>
+
+      <label
+        class="field-label"
+        for="modelMode"
+      >
+        AI Mode
+      </label>
+
+
+      <select id="modelMode">
+
+        <option value="fast">
+          Fast / economical
+        </option>
+
+        <option value="smart">
+          Smart / stronger
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div>
+
+      <label
+        class="field-label"
+        for="maxChatMessages"
+      >
+        Recipient history
+      </label>
+
+
+      <select id="maxChatMessages">
+
+        <option value="10">
+          শেষ 10 recipient messages
+        </option>
+
+        <option value="30">
+          শেষ 30 recipient messages
+        </option>
+
+      </select>
+
+    </div>
+
+  </section>
+
+
+  <p class="hint">
+    এই 10/30 message শুধু কোনো পুরোনো Inbox প্রথমবার AI ব্যবহার করার সময় analyse হবে। পরবর্তী reply-এ পুরোনো history আবার analyse হবে না।
+  </p>
+
+
+  <section class="section">
+
+    <label class="check-row">
+
+      <input
+        type="checkbox"
+        id="enableMediaAnalysis"
+      >
+
+      <span>
+        পোস্টের ছবি এবং উপলভ্য video frame/thumbnail বিশ্লেষণ করে comment তৈরি করুন।
+      </span>
+
+    </label>
+
+
+    <label class="check-row">
+
+      <input
+        type="checkbox"
+        id="preserveDraft"
+      >
+
+      <span>
+        আমি আগে কিছু লিখে থাকলে তা মুছে না দিয়ে AI draft শেষে যোগ করুন।
+      </span>
+
+    </label>
+
+
+    <label
+      class="field-label"
+      for="knowledgeBase"
+    >
+      কাস্টম নির্দেশনা / Style Preferences
+    </label>
+
+
+    <textarea
+      id="knowledgeBase"
+      maxlength="1800"
+      placeholder="যেমন: ছোট উত্তর, ভদ্র কিন্তু witty, অপ্রয়োজনীয় emoji নয়..."
+    ></textarea>
+
+  </section>
+
+
+  <section class="section">
+
+    <label class="check-row">
+
+      <input
+        type="checkbox"
+        id="privacyConsent"
+      >
+
+      <span>
+        আমি বুঝেছি যে AI reply/comment তৈরির সময় নির্বাচিত Facebook/Messenger/WhatsApp text এবং সক্ষম থাকলে post media URL/frame OpenRouter-এর AI provider-এ পাঠানো হতে পারে।
+      </span>
+
+    </label>
+
+
+    <p class="hint">
+      Extension কোনো নিজস্ব server-side conversation archive তৈরি করে না। পুরোনো Inbox প্রথমবার analyse হওয়ার পরে একটি compact conversation memory browser session-এ রাখা হয়।
+    </p>
+
+  </section>
+
+
+  <button
+    type="button"
+    class="primary-btn"
+    id="saveBtn"
+  >
+    Save Settings
+  </button>
+
+
+  <button
+    type="button"
+    class="small-btn full-btn"
+    id="clearInboxMemory"
+  >
+    Clear Inbox Session Memory
+  </button>
+
+
+  <p class="hint">
+    Clear করলে প্রতিটি পুরোনো chat পরেরবার আবার একবার করে history analyse করবে।
+  </p>
+
+
+  <div
+    id="status"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <footer class="footer">
+
+    <a
+      href="privacy.html"
+      target="_blank"
+      rel="noopener"
+    >
+      Privacy Disclosure
+    </a>
+
+
+    <span>
+      MV3 • v34.1.1
+    </span>
+
+  </footer>
+
+
+</main>
+
+
+<script src="popup.js"></script>
+
+</body>
+
+</html>

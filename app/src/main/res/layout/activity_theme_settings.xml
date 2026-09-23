@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/theme_settings_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#070B14"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:id="@+id/theme_settings_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <TextView
+            android:id="@+id/theme_settings_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/theme_settings_title"
+            android:textColor="#FFFFFF"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/theme_settings_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/theme_settings_subtitle"
+            android:textColor="#A9B1C3" />
+
+        <com.socialaiassistant.keyboard.theme.ThemePreviewView
+            android:id="@+id/theme_preview"
+            android:layout_width="match_parent"
+            android:layout_height="210dp"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/theme_active_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textColor="#19D9FF"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:id="@+id/theme_pack_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/theme_complete_packs_title"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="@string/theme_complete_packs_subtitle"
+                android:textColor="#A9B1C3"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:id="@+id/theme_pack_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/theme_surface_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/theme_customize_each_title"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="@string/theme_customize_each_subtitle"
+                android:textColor="#A9B1C3"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:id="@+id/theme_surface_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/theme_advanced_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <Button
+                android:id="@+id/button_toggle_advanced_theme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/theme_advanced_title"
+                android:textAllCaps="false" />
+
+            <LinearLayout
+                android:id="@+id/theme_advanced_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Custom Colors &amp; Shape"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <EditText android:id="@+id/theme_root_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Keyboard background  #FF090D19" android:inputType="text" android:textColor="#FFFFFF" android:textColorHint="#7C8495" />
+                <EditText android:id="@+id/theme_panel_surface_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Panel surface  #E8171C2D" android:inputType="text" android:textColor="#FFFFFF" android:textColorHint="#7C8495" />
+                <EditText android:id="@+id/theme_primary_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Primary neon  #FF19D9FF" android:inputType="text" android:textColor="#FFFFFF" android:textColorHint="#7C8495" />
+                <EditText android:id="@+id/theme_secondary_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Secondary neon  #FF8A38FF" android:inputType="text" android:textColor="#FFFFFF" android:textColorHint="#7C8495" />
+                <EditText android:id="@+id/theme_ai_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="AI accent  #FFC33CFF" android:inputType="text" android:textColor="#FFFFFF" android:textColorHint="#7C8495" />
+                <EditText android:id="@+id/theme_action_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Enter/action accent  #FF1C8CFF" android:inputType="text" android:textColor="#FFFFFF" android:textColorHint="#7C8495" />
+                <EditText android:id="@+id/theme_key_surface_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Key surface  #E51B2232" android:inputType="text" android:textColor="#FFFFFF" android:textColorHint="#7C8495" />
+                <EditText android:id="@+id/theme_key_label_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Key label  #FFEEFFFF" android:inputType="text" android:textColor="#FFFFFF" android:textColorHint="#7C8495" />
+
+                <TextView
+                    android:id="@+id/theme_contrast_warning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="Low contrast: key labels may be hard to read. Critical labels will keep a safe high-contrast fallback."
+                    android:textColor="#FFFFB74D"
+                    android:visibility="gone" />
+
+                <TextView style="@style/ThemeEditorLabel" android:text="Glow strength" />
+                <SeekBar android:id="@+id/theme_glow_seek" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="100" />
+                <TextView style="@style/ThemeEditorLabel" android:text="Glass opacity" />
+                <SeekBar android:id="@+id/theme_glass_seek" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="100" />
+                <TextView style="@style/ThemeEditorLabel" android:text="Key corner radius" />
+                <SeekBar android:id="@+id/theme_radius_seek" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="18" />
+                <TextView style="@style/ThemeEditorLabel" android:text="Key spacing" />
+                <SeekBar android:id="@+id/theme_gap_seek" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="12" />
+                <TextView style="@style/ThemeEditorLabel" android:text="Key font scale" />
+                <SeekBar android:id="@+id/theme_font_seek" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="55" />
+
+                <Button android:id="@+id/button_save_custom_theme" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Save as Custom Theme" android:textAllCaps="false" />
+                <Button android:id="@+id/button_reset_custom_theme" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Reset Custom Controls" android:textAllCaps="false" />
+
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="22dp" android:text="Manual Background Photo" android:textColor="#FFFFFF" android:textSize="17sp" android:textStyle="bold" />
+                <TextView android:id="@+id/background_photo_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="No background photo selected" android:textColor="#A9B1C3" />
+                <Button android:id="@+id/button_pick_background_photo" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Choose Photo from Gallery" android:textAllCaps="false" />
+                <TextView style="@style/ThemeEditorLabel" android:text="Apply photo to" />
+                <Spinner android:id="@+id/background_scope_spinner" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                <TextView style="@style/ThemeEditorLabel" android:text="Photo fit" />
+                <Spinner android:id="@+id/background_fit_spinner" android:layout_width="match_parent" android:layout_height="wrap_content" />
+                <TextView style="@style/ThemeEditorLabel" android:text="Photo opacity" />
+                <SeekBar android:id="@+id/background_opacity_seek" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="100" />
+                <TextView style="@style/ThemeEditorLabel" android:text="Dark overlay / dim" />
+                <SeekBar android:id="@+id/background_dim_seek" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="90" />
+                <TextView style="@style/ThemeEditorLabel" android:text="Blur" />
+                <SeekBar android:id="@+id/background_blur_seek" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="30" />
+                <Button android:id="@+id/button_apply_background_settings" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Apply Background Settings" android:textAllCaps="false" />
+                <Button android:id="@+id/button_remove_background_photo" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Remove Background Photo" android:textAllCaps="false" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Theme photos stay in this app's private storage and are never uploaded by the theme system. Choosing Photo Caption remains a separate explicit action." android:textColor="#80889A" android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/theme_legacy_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <Button
+                android:id="@+id/button_toggle_legacy_themes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/theme_legacy_title"
+                android:textAllCaps="false" />
+
+            <LinearLayout
+                android:id="@+id/theme_legacy_preset_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/button_reset_theme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="@string/theme_reset_button"
+            android:textAllCaps="false" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingBottom="24dp"
+            android:text="@string/theme_reset_hint"
+            android:textColor="#80889A"
+            android:textSize="12sp" />
+    </LinearLayout>
+</ScrollView>

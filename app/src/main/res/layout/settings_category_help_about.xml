@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_category_section"
+    style="@style/SettingsSectionCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView style="@style/SettingsSectionTitle" android:text="Help &amp; About" />
+    <TextView style="@style/SettingsSectionSubtitle" android:text="Support, application version and developer contact information." />
+    <Button android:id="@+id/button_whatsapp_support" style="@style/SettingsActionButton" android:text="WhatsApp Support" />
+    <TextView style="@style/SettingsSectionSubtitle" android:text="@string/about_app_version" />
+    <TextView style="@style/SetupStatusRow" android:text="@string/developer_name" />
+    <TextView style="@style/SetupStatusRow" android:text="@string/developer_email" />
+    <TextView style="@style/SetupStatusRow" android:text="@string/developer_whatsapp" />
+    <TextView style="@style/SetupStatusRow" android:text="@string/developer_phone" />
+</LinearLayout>

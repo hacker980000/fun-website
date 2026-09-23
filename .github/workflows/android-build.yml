@@ -1,0 +1,292 @@
+name: Android Build
+
+# Validation chain compatibility: stage23_ci_real_device_baseline.sh wraps Stage 22 -> Stage 21 -> Stage 20 -> 19 -> 18 -> 17 -> 16/15.
+# The API 36 automatic job and API 26/30/36 manual matrix therefore retain the full historical IME validation chain while collecting Stage 23 baseline evidence.
+# Historical validation aliases retained for compatibility/source-contract verification only:
+# stage22_ci_autocorrect_quality.sh | stage22-api36-autocorrect-quality-report | stage22-api${{ matrix.api-level }}-autocorrect-quality-report
+# stage21_ci_prediction_coldstart.sh | stage21-api36-prediction-coldstart-report
+# stage20_ci_resize_memory.sh | stage20-api36-resize-memory-report
+# stage19_ci_touch_responsiveness.sh | stage19-api36-touch-responsiveness-report
+# stage18_ci_render_latency.sh | stage18-api36-render-latency-report
+# stage17_ci_memory_latency.sh | stage17-api36-memory-latency-report | stage17-api${{ matrix.api-level }}-memory-latency-report
+
+on:
+  push:
+    branches: [ main, master, release-hardening ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  debug-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install API 36 SDK packages
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Set up Gradle 9.6.0
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Bootstrap verified Gradle wrapper
+        run: bash scripts/bootstrap_gradle_wrapper.sh
+
+      - name: Verify Gradle wrapper integrity
+        run: python3 scripts/check_gradle_wrapper_completeness.py
+
+      - name: Verify release contract
+        run: python3 scripts/verify_release_ready.py
+
+      - name: Verify complete source-contract suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          for verifier in scripts/verify*.py; do
+            python3 "$verifier"
+          done
+
+      - name: Verify Stage 23.8/23.9 UI contracts
+        run: |
+          python3 scripts/verify_typing_stage23_8.py
+          python3 scripts/verify_settings_theme_stage23_9.py
+
+      - name: Verify Stage 23 real-device evidence source contract
+        run: |
+          python3 scripts/verify_typing_stage20.py
+          python3 scripts/verify_typing_stage21.py
+          python3 scripts/verify_typing_stage22.py
+          python3 scripts/stage23_evidence_parser_selftest.py
+          python3 scripts/verify_typing_stage23.py
+          python3 -m py_compile scripts/stage23_parse_device_evidence.py scripts/stage23_merge_device_evidence.py
+          bash -n scripts/stage23_ci_real_device_baseline.sh
+
+      - name: Unit tests, lint, and debug APK
+        run: ./gradlew --no-daemon testDebugUnitTest lintDebug assembleDebug
+
+      - name: Verify built APK artifact
+        run: bash scripts/verify_apk_artifact.sh app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: social-ai-keyboard-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+
+  emulator-smoke:
+    needs: debug-apk
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle 9.6.0
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Bootstrap verified Gradle wrapper
+        run: bash scripts/bootstrap_gradle_wrapper.sh
+
+      - name: Download exact debug APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: social-ai-keyboard-debug-apk
+          path: artifacts/debug
+
+      - name: Enable KVM access
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: API 36 end-to-end IME smoke + instrumentation
+        uses: ReactiveCircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save
+          script: |
+            bash scripts/verify_apk_artifact.sh artifacts/debug/app-debug.apk
+            STAGE23_DEVICE_LABEL=ci-api36-smoke bash scripts/stage23_ci_real_device_baseline.sh artifacts/debug/app-debug.apk stage23-smoke-api36-real-device-baseline-report
+            ./gradlew --no-daemon connectedDebugAndroidTest
+
+      - name: Upload Stage 23 emulator evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage23-smoke-api36-real-device-baseline-report
+          path: stage23-smoke-api36-real-device-baseline-report
+          if-no-files-found: warn
+
+
+  emulator-compat-matrix:
+    if: github.event_name == 'workflow_dispatch'
+    needs: debug-apk
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        api-level: [26, 30, 36]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Download exact debug APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: social-ai-keyboard-debug-apk
+          path: artifacts/debug
+
+      - name: Enable KVM access
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: API ${{ matrix.api-level }} compatibility smoke
+        uses: ReactiveCircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save
+          script: STAGE23_DEVICE_LABEL=ci-api${{ matrix.api-level }} bash scripts/stage23_ci_real_device_baseline.sh artifacts/debug/app-debug.apk stage23-api${{ matrix.api-level }}-real-device-baseline-report
+
+      - name: Upload compatibility evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage23-api${{ matrix.api-level }}-real-device-baseline-report
+          path: stage23-api${{ matrix.api-level }}-real-device-baseline-report
+          if-no-files-found: warn
+
+
+  stage23-baseline-summary:
+    if: github.event_name == 'workflow_dispatch'
+    needs: emulator-compat-matrix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Stage 23 device evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: stage23-api*-real-device-baseline-report
+          path: stage23-matrix-artifacts
+
+      - name: Merge API 26/30/36 baseline summaries
+        run: python3 scripts/stage23_merge_device_evidence.py stage23-matrix-artifacts stage23-device-matrix-summary
+
+      - name: Upload Stage 23 matrix summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage23-device-matrix-summary
+          path: stage23-device-matrix-summary
+          if-no-files-found: error
+
+  signed-release-aab:
+    if: github.event_name == 'workflow_dispatch'
+    needs: debug-apk
+    runs-on: ubuntu-latest
+    env:
+      PLAY_UPLOAD_KEYSTORE_B64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_B64 }}
+      ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_STORE_PASSWORD }}
+      ORG_GRADLE_PROJECT_RELEASE_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
+      ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
+      ORG_GRADLE_PROJECT_RELEASE_STORE_FILE: ${{ github.workspace }}/upload-keystore.jks
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install API 36 SDK packages
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Set up Gradle 9.6.0
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Bootstrap verified Gradle wrapper
+        run: bash scripts/bootstrap_gradle_wrapper.sh
+
+      - name: Verify Gradle wrapper integrity
+        run: python3 scripts/check_gradle_wrapper_completeness.py
+
+      - name: Validate signing secrets
+        shell: bash
+        run: |
+          test -n "$PLAY_UPLOAD_KEYSTORE_B64"
+          test -n "$ORG_GRADLE_PROJECT_RELEASE_STORE_PASSWORD"
+          test -n "$ORG_GRADLE_PROJECT_RELEASE_KEY_ALIAS"
+          test -n "$ORG_GRADLE_PROJECT_RELEASE_KEY_PASSWORD"
+
+      - name: Restore upload keystore
+        shell: bash
+        run: printf '%s' "$PLAY_UPLOAD_KEYSTORE_B64" | base64 --decode > "$ORG_GRADLE_PROJECT_RELEASE_STORE_FILE"
+
+      - name: Verify release contract
+        run: python3 scripts/verify_release_ready.py
+
+      - name: Release lint + optimized signed app bundle
+        run: ./gradlew --no-daemon lintRelease bundleRelease
+
+      - name: Upload signed release AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: social-ai-keyboard-release-aab
+          path: app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      - name: Delete temporary upload keystore
+        if: always()
+        shell: bash
+        run: rm -f "$ORG_GRADLE_PROJECT_RELEASE_STORE_FILE"

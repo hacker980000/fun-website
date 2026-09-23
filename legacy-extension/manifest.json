@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Social AI Assistant Pro",
+  "version": "34.1.1",
+  "description": "Context-aware AI comments and cached sender-aware inbox replies with multimodal post analysis and protected API handling.",
+  "minimum_chrome_version": "102",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://openrouter.ai/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.facebook.com/*",
+        "https://m.facebook.com/*",
+        "https://www.messenger.com/*",
+        "https://business.facebook.com/*",
+        "https://web.whatsapp.com/*"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

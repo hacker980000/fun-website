@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+from pathlib import Path
+
+root = Path(__file__).resolve().parents[1]
+models = (root / 'app/src/main/java/com/socialaiassistant/keyboard/context/ContextModels.kt').read_text()
+classifier = (root / 'app/src/main/java/com/socialaiassistant/keyboard/context/ConversationSenderClassifier.kt').read_text()
+ordering = (root / 'app/src/main/java/com/socialaiassistant/keyboard/context/ConversationNodeOrdering.kt').read_text()
+adapter = (root / 'app/src/main/java/com/socialaiassistant/keyboard/context/GenericConversationAdapter.kt').read_text()
+hints = (root / 'app/src/main/java/com/socialaiassistant/keyboard/context/ConversationHintResolver.kt').read_text()
+keys = (root / 'app/src/main/java/com/socialaiassistant/keyboard/context/ConversationKeyFactory.kt').read_text()
+service = (root / 'app/src/main/java/com/socialaiassistant/keyboard/context/SocialAiAccessibilityService.kt').read_text()
+repo = (root / 'app/src/main/java/com/socialaiassistant/keyboard/memory/ConversationRepository.kt').read_text()
+managed = (root / 'app/src/main/java/com/socialaiassistant/keyboard/backend/ManagedAiPayload.kt').read_text()
+prompt = (root / 'app/src/main/java/com/socialaiassistant/keyboard/ai/ExtensionPromptBuilder.kt').read_text()
+intent = (root / 'app/src/main/java/com/socialaiassistant/keyboard/ai/ConversationAiIntentResolver.kt').read_text()
+key_test = (root / 'app/src/test/java/com/socialaiassistant/keyboard/context/ConversationKeyFactoryTest.kt').read_text()
+adapter_test = (root / 'app/src/test/java/com/socialaiassistant/keyboard/context/GenericConversationAdapterTest.kt').read_text()
+sender_test = (root / 'app/src/test/java/com/socialaiassistant/keyboard/context/ConversationSenderClassifierTest.kt').read_text()
+repo_test = (root / 'app/src/test/java/com/socialaiassistant/keyboard/memory/ConversationRepositoryTest.kt').read_text()
+privacy = (root / 'docs/privacy/context-access-disclosure.md').read_text()
+checklist = (root / 'docs/testing/multi-app-context-adapters-checklist.md').read_text()
+matrix = (root / 'docs/testing/release-device-matrix.md').read_text()
+
+checks = []
+def require(name, condition):
+    checks.append((name, bool(condition)))
+    if not condition:
+        raise SystemExit(f'FAIL: {name}')
+
+require('VisibleTextNode carries screen geometry', all(x in models for x in ['screenLeft:', 'screenTop:', 'screenRight:', 'screenBottom:', 'hasScreenBounds']))
+require('sender classifier prefers semantics then conservative geometry', 'semanticSender(node)' in classifier and 'MAX_BUBBLE_WIDTH_FRACTION' in classifier and 'SenderClass.UNKNOWN' in classifier)
+require('sender classifier supports RTL mirroring', 'isRtlLayout && leading -> SenderClass.SELF' in classifier and 'isRtlLayout && trailing -> SenderClass.RECIPIENT' in classifier)
+require('content-description sender matching uses explicit role phrases', 'SELF_DESCRIPTION_MARKERS' in classifier and 'RECIPIENT_DESCRIPTION_MARKERS' in classifier and 'arbitrary message text is never' in classifier)
+require('service captures bounds and invokes sender classifier', 'node.getBoundsInScreen(bounds)' in service and 'ConversationSenderClassifier.infer(' in service)
+require('window transition clears stale snapshot before debounce', 'safeEvent.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED' in service and service.find('ContextSnapshotBus.clear()', service.find('A window transition')) < service.find('debounceExtract(packageName'))
+require('visual ordering is geometry aware with deterministic fallback', 'nodes.all { it.hasScreenBounds }' in ordering and 'nodes.sortedBy { it.order }' in ordering)
+require('mirrored Accessibility rows are deduplicated', 'dedupeMirroredAccessibilityRows' in ordering and 'DUPLICATE_BOUNDS_TOLERANCE_PX' in ordering)
+require('generic adapter applies visual ordering', 'ConversationNodeOrdering.chronological(eligibleNodes)' in adapter)
+require('bounded context spends budget newest first', 'for (candidate in candidates.asReversed())' in adapter and 'val normalized = newestFirst.asReversed()' in adapter)
+require('stable identity comes only from explicit identity nodes', 'ConversationNodeOrdering.chronological(nodes.filter(::isIdentityNode))' in hints and 'normalizeCandidate(explicitHint)' not in hints)
+require('transient event/window metadata are not promoted to conversation identity', 'not a trustworthy thread identifier' in hints and 'windowId/className' in hints and 'return null' in hints)
+require('broad per-message username marker is not treated as thread identity', '"username"' not in hints)
+require('key factory exposes stable identity gate', 'fun hasStableIdentity(snapshot: ContextSnapshot): Boolean' in keys)
+require('missing identity key is capture scoped', 'append(snapshot.capturedAtMillis)' in keys and '"ephemeral:"' in keys)
+require('repository refuses persistence without stable identity', 'if (!keyFactory.hasStableIdentity(snapshot))' in repo and 'return@withContext transientHistory(snapshot, key)' in repo)
+require('transient history uses current snapshot only', 'private fun transientHistory' in repo and 'snapshot.messages.mapNotNull' in repo)
+require('managed payload never promotes UNKNOWN to OTHER', '.filter { it.sender != SenderClass.UNKNOWN }' in managed and 'fabricates recipient attribution' in managed)
+require('reply intent already ignores UNKNOWN rows', 'message.sender != SenderClass.UNKNOWN' in intent)
+require('group-chat prompt avoids merging participant identities', 'In a group chat, consecutive OTHER lines may come from different people' in prompt and 'UNKNOWN is unclassified visible context' in prompt)
+require('sender classifier regression tests cover semantic geometry RTL and full-width', all(x in sender_test for x in ['semantic_outgoing_marker_wins_over_geometry', 'rtl_layout_mirrors_leading_and_trailing_roles', 'full_width_system_row_is_unknown']))
+require('adapter tests cover visual order recent budget and duplicate suppression', all(x in adapter_test for x in ['visual_top_to_bottom_geometry_overrides_tree_traversal_order', 'bounded_char_budget_keeps_recent_rows_not_oldest_rows', 'mirrored_accessibility_rows_with_same_bounds_are_deduplicated']))
+require('key tests reject persistent window fallback', 'missing_hint_is_capture_scoped_instead_of_window_persistent' in key_test and 'assertFalse(factory.hasStableIdentity(first))' in key_test)
+require('repository test proves unidentified threads are not persisted', 'missing_stable_identity_returns_snapshot_only_and_does_not_persist_messages' in repo_test and 'countMessages(firstHistory.key.value)' in repo_test)
+require('privacy disclosure documents identity isolation and UNKNOWN behavior', 'raw Android `windowId`' in privacy and 'An `UNKNOWN` row is not promoted' in privacy)
+require('device checklist covers thread switching group chat RTL and recent budget', all(x in checklist for x in ['Stage 25.4 Context Accuracy / Thread Isolation', 'Switch rapidly from thread A to thread B', 'group chat', 'RTL', 'newest rows']))
+require('release device matrix includes context accuracy regression', 'Stage 25.4 conversation-context accuracy regression' in matrix)
+
+print(f'Stage 25.4 conversation-context verifier PASS ({len(checks)}/{len(checks)})')
+for name, _ in checks:
+    print(f'  PASS: {name}')

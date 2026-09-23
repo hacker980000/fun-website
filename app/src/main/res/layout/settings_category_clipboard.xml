@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_category_section"
+    style="@style/SettingsSectionCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView style="@style/SettingsSectionTitle" android:text="Clipboard" />
+    <TextView style="@style/SettingsSectionSubtitle" android:text="Optional history is off by default. When enabled, up to 20 items are encrypted on-device and expire after 24 hours." />
+    <CheckBox android:id="@+id/clipboard_history_checkbox" style="@style/SettingsCheckBox" android:text="Keep encrypted clipboard history for 24 hours" />
+    <Button android:id="@+id/button_clear_clipboard_history" style="@style/SettingsSecondaryButton" android:text="Clear Recent Clipboard History" />
+</LinearLayout>

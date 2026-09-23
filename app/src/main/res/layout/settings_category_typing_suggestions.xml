@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settings_category_section"
+    style="@style/SettingsSectionCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView style="@style/SettingsSectionTitle" android:text="Typing &amp; Suggestions" />
+    <TextView style="@style/SettingsSectionSubtitle" android:text="Control local typing learning, cursor gestures, glide, toolbar profile and key feedback." />
+
+    <TextView android:id="@+id/status_typing_learning" style="@style/SetupStatusRow" android:text="Personal typing learning: On" />
+    <CheckBox android:id="@+id/personal_typing_learning_checkbox" style="@style/SettingsCheckBox" android:text="Learn my words and next-word patterns on this device" />
+    <Button android:id="@+id/button_clear_typing_learning" style="@style/SettingsSecondaryButton" android:text="Clear Learned Typing Data" />
+    <CheckBox android:id="@+id/spacebar_cursor_checkbox" style="@style/SettingsCheckBox" android:text="Swipe spacebar left/right to move cursor" />
+    <CheckBox android:id="@+id/glide_typing_checkbox" style="@style/SettingsCheckBox" android:text="Swipe across letters for Glide typing (foundation)" />
+
+    <TextView android:id="@+id/status_toolbar_profile" style="@style/SetupStatusRow" android:text="Toolbar: Balanced" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <Button android:id="@+id/button_toolbar_balanced" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="Balanced" />
+        <Button android:id="@+id/button_toolbar_ai_first" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="AI First" />
+    </LinearLayout>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+        <Button android:id="@+id/button_toolbar_typing" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="Typing" />
+        <Button android:id="@+id/button_toolbar_minimal" style="@style/SettingsSecondaryButton" android:layout_width="0dp" android:layout_weight="1" android:text="Minimal" />
+    </LinearLayout>
+
+    <CheckBox android:id="@+id/haptic_feedback_checkbox" style="@style/SettingsCheckBox" android:text="Keypress vibration / haptic feedback" />
+    <CheckBox android:id="@+id/key_sound_checkbox" style="@style/SettingsCheckBox" android:text="Keypress sound" />
+</LinearLayout>

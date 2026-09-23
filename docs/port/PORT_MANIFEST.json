@@ -1,0 +1,20 @@
+{
+  "project": "Social AI Keyboard",
+  "date": "2026-09-18",
+  "androidPackage": "com.socialaiassistant.keyboard",
+  "portedVersion": "35.3.1",
+  "versionCode": 350301,
+  "baseline": "Social_AI_Keyboard_BuildReady_v2_2026-09-14.zip",
+  "backend": "https://super-boat-4aba.madigitalstudio2018.workers.dev",
+  "backendReleaseReference": "Social AI Assistant Pro 35.3.1",
+  "latestMigration": "0009_multi_account_same_device.sql",
+  "verification": {
+    "releaseVerifier": "PASS",
+    "staticPreflight": "PASS",
+    "fullGradleBuild": "NOT_COMPLETED_NETWORK_UNAVAILABLE"
+  },
+  "manualSendPostOnly": true,
+  "managedGenerationRequiresExplicitTap": true,
+  "accountScopedPersonalTraining": true,
+  "photoCaptionMaxImages": 4
+}

@@ -1,0 +1,315 @@
+.social-ai-wrapper {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 4px !important;
+  vertical-align: middle !important;
+  z-index: 99999 !important;
+  flex-shrink: 0 !important;
+}
+
+.social-ai-main-btn {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+
+  border-radius: 999px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #2563eb 0%,
+      #d946ef 100%
+    ) !important;
+
+  color: #fff !important;
+
+  border: 0 !important;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif !important;
+
+  font-weight: 800 !important;
+  font-size: 10px !important;
+
+  cursor: pointer !important;
+
+  display: inline-flex !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
+  box-shadow:
+    0 2px 7px
+    rgba(0, 0, 0, .28) !important;
+
+  transition:
+    transform .15s ease,
+    opacity .15s ease !important;
+
+  padding: 0 !important;
+
+  user-select: none !important;
+}
+
+.social-ai-main-btn:hover {
+  transform: scale(1.08) !important;
+}
+
+.social-ai-main-btn:focus-visible {
+  outline:
+    2px solid
+    #38bdf8 !important;
+
+  outline-offset:
+    2px !important;
+}
+
+.social-ai-main-btn:disabled {
+  cursor: wait !important;
+
+  opacity:
+    .7 !important;
+
+  transform:
+    none !important;
+}
+
+
+.social-ai-spinner {
+  width: 11px !important;
+  height: 11px !important;
+
+  border:
+    2px solid
+    rgba(255, 255, 255, .45) !important;
+
+  border-top-color:
+    #fff !important;
+
+  border-radius:
+    50% !important;
+
+  animation:
+    social-ai-spin
+    .75s linear infinite !important;
+}
+
+
+@keyframes social-ai-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* MENU */
+
+.social-ai-menu {
+  display: none !important;
+
+  position: fixed !important;
+
+  box-sizing:
+    border-box !important;
+
+  background:
+    #172033 !important;
+
+  border:
+    1px solid
+    #475569 !important;
+
+  border-radius:
+    10px !important;
+
+  box-shadow:
+    0 12px 32px
+    rgba(0, 0, 0, .48) !important;
+
+  padding:
+    6px !important;
+
+  min-width:
+    190px !important;
+
+  max-width:
+    min(
+      250px,
+      calc(100vw - 16px)
+    ) !important;
+
+  flex-direction:
+    column !important;
+
+  gap:
+    3px !important;
+
+  z-index:
+    2147483647 !important;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif !important;
+}
+
+
+.social-ai-menu.social-ai-show {
+  display: flex !important;
+}
+
+
+.social-ai-menu-item {
+  background:
+    transparent !important;
+
+  color:
+    #f8fafc !important;
+
+  border:
+    0 !important;
+
+  padding:
+    9px 10px !important;
+
+  font-size:
+    12px !important;
+
+  font-weight:
+    650 !important;
+
+  text-align:
+    left !important;
+
+  border-radius:
+    7px !important;
+
+  cursor:
+    pointer !important;
+
+  display:
+    flex !important;
+
+  align-items:
+    center !important;
+
+  gap:
+    7px !important;
+
+  white-space:
+    nowrap !important;
+}
+
+
+.social-ai-menu-item:hover,
+.social-ai-menu-item:focus-visible {
+  background:
+    #2b3a52 !important;
+
+  color:
+    #7dd3fc !important;
+
+  outline:
+    none !important;
+}
+
+
+.social-ai-menu-meta {
+  color:
+    #94a3b8 !important;
+
+  font-size:
+    10px !important;
+
+  padding:
+    4px 10px 2px !important;
+}
+
+
+/* TOAST */
+
+.social-ai-toast-wrap {
+  position:
+    fixed !important;
+
+  right:
+    18px !important;
+
+  bottom:
+    18px !important;
+
+  z-index:
+    2147483647 !important;
+
+  display:
+    flex !important;
+
+  flex-direction:
+    column !important;
+
+  gap:
+    8px !important;
+
+  max-width:
+    min(
+      360px,
+      calc(100vw - 36px)
+    ) !important;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif !important;
+}
+
+
+.social-ai-toast {
+  background:
+    #0f172a !important;
+
+  color:
+    #f8fafc !important;
+
+  border:
+    1px solid
+    #334155 !important;
+
+  box-shadow:
+    0 8px 24px
+    rgba(0, 0, 0, .35) !important;
+
+  border-radius:
+    9px !important;
+
+  padding:
+    10px 12px !important;
+
+  font-size:
+    12px !important;
+
+  line-height:
+    1.4 !important;
+}
+
+
+.social-ai-toast[data-kind="error"] {
+  border-color:
+    #ef4444 !important;
+}
+
+
+.social-ai-toast[data-kind="success"] {
+  border-color:
+    #22c55e !important;
+}
