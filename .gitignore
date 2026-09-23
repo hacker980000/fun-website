@@ -4,3 +4,18 @@
 *.keystore
 keystore.properties
 local.properties
+# Android Studio
+.idea/
+*.iml
+
+# Gradle
+.gradle/
+build/
+app/build/
+gradle/gradle-daemon-jvm.properties
+
+# Temporary test files
+tDebugUnitTest.gradlew
+testDebugUnitTest
+tDebugUnitTest.gradlew
+testDebugUnitTest
