@@ -5,7 +5,10 @@ import android.view.inputmethod.CursorAnchorInfo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class BubbleCursorAnchorMapperTest {
     @Test fun mapsInsertionMarkerThroughCursorMatrix() {
         val matrix = Matrix().apply {
@@ -22,6 +25,7 @@ class BubbleCursorAnchorMapperTest {
     @Test fun nanInsertionMarkerReturnsNull() {
         val info = CursorAnchorInfo.Builder()
             .setInsertionMarkerLocation(Float.NaN, 20f, 24f, 28f, 0)
+            .setMatrix(Matrix())
             .build()
         assertNull(BubbleCursorAnchorMapper.map(info))
     }

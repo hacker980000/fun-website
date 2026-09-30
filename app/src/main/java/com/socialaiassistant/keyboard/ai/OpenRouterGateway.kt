@@ -8,8 +8,11 @@ import java.net.UnknownHostException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonArray
@@ -32,22 +35,26 @@ class OpenRouterGateway(
     private val client: OkHttpClient,
     private val apiKeyProvider: () -> String?,
     private val endpoint: HttpUrl = DEFAULT_ENDPOINT.toHttpUrl(),
-    private val totalTimeoutMs: Long = TOTAL_TIMEOUT_MS
+    private val totalTimeoutMs: Long = TOTAL_TIMEOUT_MS,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : AiGateway {
     constructor(
         client: OkHttpClient,
         secretStore: SecretStore,
         endpoint: HttpUrl = DEFAULT_ENDPOINT.toHttpUrl(),
-        totalTimeoutMs: Long = TOTAL_TIMEOUT_MS
-    ) : this(client, secretStore::getOpenRouterKey, endpoint, totalTimeoutMs)
+        totalTimeoutMs: Long = TOTAL_TIMEOUT_MS,
+        ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    ) : this(client, secretStore::getOpenRouterKey, endpoint, totalTimeoutMs, ioDispatcher)
 
     override suspend fun generate(request: AiGenerationRequest): AiGenerationResult {
         val apiKey = apiKeyProvider()?.trim().orEmpty()
         if (apiKey.isEmpty()) throw AiGatewayException.InvalidApiKey()
 
         return try {
-            withTimeout(totalTimeoutMs) {
-                generateWithFallback(apiKey, request)
+            withContext(ioDispatcher) {
+                withTimeout(totalTimeoutMs) {
+                    generateWithFallback(apiKey, request)
+                }
             }
         } catch (error: TimeoutCancellationException) {
             throw AiGatewayException.Timeout(error)
