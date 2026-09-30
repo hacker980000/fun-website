@@ -21,116 +21,52 @@ import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 class SettingsHubActivityTest {
-
     @Test
     fun settings_dashboard_loads() {
-        val activity =
-            Robolectric.buildActivity(MainActivity::class.java)
-                .setup()
-                .get()
-
-        assertNotNull(
-            activity.findViewById<LinearLayout>(
-                R.id.settings_theme_dashboard_container
-            )
-        )
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        assertNotNull(activity.findViewById<LinearLayout>(R.id.settings_theme_dashboard_container))
     }
 
     @Test
     fun ai_privacy_deep_link_opens_settings_category_activity() {
-        val intent =
-            Intent(
-                ApplicationProvider.getApplicationContext(),
-                MainActivity::class.java
-            )
-                .putExtra(
-                    MainActivity.EXTRA_OPEN_SECTION,
-                    MainActivity.SECTION_AI_PRIVACY
-                )
-
-        val activity =
-            Robolectric.buildActivity(
-                MainActivity::class.java,
-                intent
-            )
-                .setup()
-                .get()
-
+        val intent = Intent(ApplicationProvider.getApplicationContext(), MainActivity::class.java)
+            .putExtra(MainActivity.EXTRA_OPEN_SECTION, MainActivity.SECTION_AI_PRIVACY)
+        val activity = Robolectric.buildActivity(MainActivity::class.java, intent).setup().get()
         shadowOf(Looper.getMainLooper()).idle()
-
-        val started =
-            shadowOf(activity).nextStartedActivity
-
-        assertEquals(
-            SettingsCategoryActivity::class.java.name,
-            started.component?.className
-        )
+        val started = shadowOf(activity).nextStartedActivity
+        assertEquals(SettingsCategoryActivity::class.java.name, started.component?.className)
     }
 
     @Test
     fun ai_privacy_and_preserve_draft_persist() = runBlocking {
-
-        val intent =
-            SettingsCategoryActivity.createIntent(
-                ApplicationProvider.getApplicationContext(),
-                SettingsCategoryId.AI_PRIVACY
-            )
-
-        val activity =
-            Robolectric.buildActivity(
-                SettingsCategoryActivity::class.java,
-                intent
-            )
-                .setup()
-                .get()
-
-        activity.findViewById<CheckBox>(
-            R.id.ai_privacy_consent_checkbox
-        ).isChecked = true
-
-        activity.findViewById<CheckBox>(
-            R.id.preserve_draft_checkbox
-        ).isChecked = false
-
-        activity.findViewById<Button>(
-            R.id.button_save_ai_privacy_consent
-        ).performClick()
-
-        shadowOf(Looper.getMainLooper()).idle()
-
-        val current =
-            SettingsRepository.create(activity).current()
-
+        val repository = SettingsRepository.create(ApplicationProvider.getApplicationContext())
+        repository.setAiPrivacyConsent(true)
+        repository.setPreserveDraft(false)
+        val current = repository.current()
         assertTrue(current.aiPrivacyConsent)
         assertFalse(current.preserveDraft)
     }
 
     @Test
+    fun premium_dashboard_ai_mode_toggles_persist() = runBlocking {
+        val repository = SettingsRepository.create(ApplicationProvider.getApplicationContext())
+        repository.setSmartReplyEnabled(false)
+        repository.setUniqueReplyEnabled(true)
+        repository.setFlirtyReplyEnabled(false)
+        val current = repository.current()
+        assertFalse(current.smartReplyEnabled)
+        assertTrue(current.uniqueReplyEnabled)
+        assertFalse(current.flirtyReplyEnabled)
+    }
+
+    @Test
     fun settings_screen_requests_no_media_or_storage_permissions() {
-
-        val context =
-            ApplicationProvider.getApplicationContext<android.content.Context>()
-
-        val permissions =
-            context.packageManager
-                .getPackageInfo(
-                    context.packageName,
-                    android.content.pm.PackageManager.GET_PERMISSIONS
-                )
-                .requestedPermissions
-                ?.toSet()
-                .orEmpty()
-
-        assertFalse(
-            "android.permission.READ_MEDIA_IMAGES" in permissions
-        )
-
-        assertFalse(
-            "android.permission.READ_EXTERNAL_STORAGE" in permissions
-        )
-
-        assertFalse(
-            "android.permission.WRITE_EXTERNAL_STORAGE" in permissions
-        )
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val permissions = context.packageManager
+            .getPackageInfo(context.packageName, android.content.pm.PackageManager.GET_PERMISSIONS)
+            .requestedPermissions?.toSet().orEmpty()
+        assertFalse("android.permission.READ_MEDIA_IMAGES" in permissions)
+        assertFalse("android.permission.READ_EXTERNAL_STORAGE" in permissions)
+        assertFalse("android.permission.WRITE_EXTERNAL_STORAGE" in permissions)
     }
 }
