@@ -29,6 +29,9 @@ data class AppSettings(
     val englishSuggestions: Boolean = true,
     val englishAutocorrect: Boolean = true,
     val smartLanguageHints: Boolean = true,
+    val smartReplyEnabled: Boolean = true,
+    val uniqueReplyEnabled: Boolean = true,
+    val flirtyReplyEnabled: Boolean = true,
     val showNumberRow: Boolean = false,
     val spacebarCursorControl: Boolean = true,
     val hapticFeedback: Boolean = true,
@@ -62,48 +65,29 @@ class SettingsRepository(
     suspend fun current(): AppSettings = settings.first()
 
     suspend fun setModelMode(value: ModelMode) = update(MODEL_MODE, value.name.lowercase())
-
     suspend fun setGatewayMode(value: GatewayMode) = update(GATEWAY_MODE, value.name.lowercase())
-
     suspend fun setPreserveDraft(value: Boolean) = update(PRESERVE_DRAFT, value)
-
     suspend fun setPersonalTypingLearning(value: Boolean) = update(PERSONAL_TYPING_LEARNING, value)
-
     suspend fun setEnglishSuggestions(value: Boolean) = update(ENGLISH_SUGGESTIONS, value)
-
     suspend fun setEnglishAutocorrect(value: Boolean) = update(ENGLISH_AUTOCORRECT, value)
-
     suspend fun setSmartLanguageHints(value: Boolean) = update(SMART_LANGUAGE_HINTS, value)
-
+    suspend fun setSmartReplyEnabled(value: Boolean) = update(SMART_REPLY_ENABLED, value)
+    suspend fun setUniqueReplyEnabled(value: Boolean) = update(UNIQUE_REPLY_ENABLED, value)
+    suspend fun setFlirtyReplyEnabled(value: Boolean) = update(FLIRTY_REPLY_ENABLED, value)
     suspend fun setShowNumberRow(value: Boolean) = update(SHOW_NUMBER_ROW, value)
-
     suspend fun setSpacebarCursorControl(value: Boolean) = update(SPACEBAR_CURSOR_CONTROL, value)
-
     suspend fun setHapticFeedback(value: Boolean) = update(HAPTIC_FEEDBACK, value)
-
     suspend fun setKeySound(value: Boolean) = update(KEY_SOUND, value)
-
     suspend fun setClipboardHistory(value: Boolean) = update(CLIPBOARD_HISTORY, value)
-
     suspend fun setKeyboardKeyHeightDp(value: Int) = update(KEYBOARD_KEY_HEIGHT_DP, normalizeKeyHeight(value))
-
     suspend fun setGlideTyping(value: Boolean) = update(GLIDE_TYPING, value)
-
     suspend fun setBubbleKeyEnabled(value: Boolean) = update(BUBBLE_KEY_ENABLED, value)
-
     suspend fun setBubbleKeyIntensity(value: BubbleKeyIntensity) = update(BUBBLE_KEY_INTENSITY, value.settingValue)
-
     suspend fun setOneHandedMode(value: OneHandedMode) = update(ONE_HANDED_MODE, value.settingValue)
-
     suspend fun setToolbarProfile(value: ToolbarProfile) = update(TOOLBAR_PROFILE, value.settingValue)
-
     suspend fun setAiPrivacyConsent(value: Boolean) = update(AI_PRIVACY_CONSENT, value)
-
     suspend fun setContextAccessConsent(value: Boolean) = update(CONTEXT_ACCESS_CONSENT, value)
-
-    suspend fun setAccessibilityDisclosureAccepted(value: Boolean) =
-        update(ACCESSIBILITY_DISCLOSURE_ACCEPTED, value)
-
+    suspend fun setAccessibilityDisclosureAccepted(value: Boolean) = update(ACCESSIBILITY_DISCLOSURE_ACCEPTED, value)
     suspend fun setMaxChatMessages(value: Int) = update(MAX_CHAT_MESSAGES, normalizeChatLimit(value))
 
     suspend fun setTonePreset(value: TonePreset) {
@@ -147,6 +131,9 @@ class SettingsRepository(
         englishSuggestions = preferences[ENGLISH_SUGGESTIONS] ?: true,
         englishAutocorrect = preferences[ENGLISH_AUTOCORRECT] ?: true,
         smartLanguageHints = preferences[SMART_LANGUAGE_HINTS] ?: true,
+        smartReplyEnabled = preferences[SMART_REPLY_ENABLED] ?: true,
+        uniqueReplyEnabled = preferences[UNIQUE_REPLY_ENABLED] ?: true,
+        flirtyReplyEnabled = preferences[FLIRTY_REPLY_ENABLED] ?: true,
         showNumberRow = preferences[SHOW_NUMBER_ROW] ?: false,
         spacebarCursorControl = preferences[SPACEBAR_CURSOR_CONTROL] ?: true,
         hapticFeedback = preferences[HAPTIC_FEEDBACK] ?: true,
@@ -184,6 +171,9 @@ class SettingsRepository(
         private val ENGLISH_SUGGESTIONS = booleanPreferencesKey("english_suggestions")
         private val ENGLISH_AUTOCORRECT = booleanPreferencesKey("english_autocorrect")
         private val SMART_LANGUAGE_HINTS = booleanPreferencesKey("smart_language_hints")
+        private val SMART_REPLY_ENABLED = booleanPreferencesKey("smart_reply_enabled")
+        private val UNIQUE_REPLY_ENABLED = booleanPreferencesKey("unique_reply_enabled")
+        private val FLIRTY_REPLY_ENABLED = booleanPreferencesKey("flirty_reply_enabled")
         private val SHOW_NUMBER_ROW = booleanPreferencesKey("show_number_row")
         private val SPACEBAR_CURSOR_CONTROL = booleanPreferencesKey("spacebar_cursor_control")
         private val HAPTIC_FEEDBACK = booleanPreferencesKey("haptic_feedback")
