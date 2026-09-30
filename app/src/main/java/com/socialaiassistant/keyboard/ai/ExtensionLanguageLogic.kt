@@ -102,4 +102,14 @@ object ExtensionLanguageLogic {
             Avoid unnecessary English words.
         """.trimIndent()
     }
+    fun buildForcedBanglaInboxInstruction(): String = """
+        LANGUAGE MODE: FORCED BENGALI INBOX.
+        This keyboard's Smart Reply, Unique Reply, and Flirty Reply inbox modes always output Bengali.
+        Write the final reply in natural Bangla using Bengali script (বাংলা লিপি), regardless of whether OTHER wrote in English, Banglish, Bengali, or another language.
+        Understand non-Bengali source text internally and answer its meaning in Bengali; do not mirror English/Banglish wording in the final reply except unavoidable names, brands, URLs, codes, or technical terms.
+        For a new/empty Messenger or WhatsApp conversation, start in Bengali by default.
+        For an existing conversation, analyze the recent context first and preserve its meaning/topic while still writing the final answer in Bengali script.
+        This language rule is mandatory and has priority over tone/style preferences.
+    """.trimIndent()
+
 }
