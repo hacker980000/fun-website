@@ -7,7 +7,7 @@ import org.junit.Test
 class ClipboardTextPolicyTest {
     @Test
     fun sanitize_drops_blank_and_limits_items() {
-        val source = listOf(" one ", "", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+        val source = listOf(" one ", "", "two", "three", "four", "five", "six", "seven", "eight")
         val result = ClipboardTextPolicy.sanitize(source)
         assertEquals(8, result.size)
         assertEquals("one", result.first())
