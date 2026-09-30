@@ -26,7 +26,7 @@ class ReplyOrchestratorTest {
         val f = fixture()
         f.snapshots.value = snapshot(SenderClass.RECIPIENT, "How are you?")
         advanceUntilIdle()
-        f.snapshots.value = snapshot(SenderClass.RECIPIENT, "Are you free?", 2_000L)
+        f.snapshots.value = snapshot(SenderClass.RECIPIENT, "Are you free?", System.currentTimeMillis())
         advanceUntilIdle()
         assertEquals(0, f.gateway.calls)
     }
@@ -45,7 +45,7 @@ class ReplyOrchestratorTest {
         val f = fixture(snapshot(SenderClass.RECIPIENT, "How are you?"))
         f.orchestrator.requestAuto()
         advanceUntilIdle()
-        f.snapshots.value = snapshot(SenderClass.RECIPIENT, "New incoming message", 2_000L)
+        f.snapshots.value = snapshot(SenderClass.RECIPIENT, "New incoming message", System.currentTimeMillis())
         advanceUntilIdle()
         assertEquals(1, f.gateway.calls)
     }
@@ -55,7 +55,7 @@ class ReplyOrchestratorTest {
         val f = fixture(snapshot(SenderClass.RECIPIENT, "How are you?"))
         f.orchestrator.requestAuto()
         advanceUntilIdle()
-        f.snapshots.value = snapshot(SenderClass.RECIPIENT, "New incoming message", 2_000L)
+        f.snapshots.value = snapshot(SenderClass.RECIPIENT, "New incoming message", System.currentTimeMillis())
         f.orchestrator.requestAuto()
         advanceUntilIdle()
         assertEquals(2, f.gateway.calls)
@@ -77,7 +77,7 @@ class ReplyOrchestratorTest {
         f.orchestrator.requestAuto()
         advanceUntilIdle()
         assertTrue(f.gateway.lastPromptUser.contains("Answer me"))
-        assertTrue(f.gateway.lastPromptSystem.contains("Reply to the latest OTHER message"))
+        assertTrue(f.gateway.lastPromptSystem.contains("Answer the recipient's question or message directly and accurately"))
     }
 
     @Test
@@ -85,7 +85,7 @@ class ReplyOrchestratorTest {
         val f = fixture(snapshot(SenderClass.SELF, "I will call later"))
         f.orchestrator.requestAuto()
         advanceUntilIdle()
-        assertTrue(f.gateway.lastPromptSystem.contains("Continue naturally without pretending OTHER replied"))
+        assertTrue(f.gateway.lastPromptSystem.contains("The latest message is SELF. Continue the conversation naturally"))
     }
 
     @Test
@@ -93,16 +93,16 @@ class ReplyOrchestratorTest {
         val f = fixture(emptySnapshot("Alice"))
         f.orchestrator.requestAuto()
         advanceUntilIdle()
-        assertTrue(f.gateway.lastPromptSystem.contains("Write a natural first message"))
+        assertTrue(f.gateway.lastPromptSystem.contains("initial conversation opener"))
     }
 
     @Test
-    fun empty_without_hint_needs_context_without_gateway_call() = runTest {
+    fun empty_inbox_without_hint_uses_new_conversation_policy() = runTest {
         val f = fixture(emptySnapshot(null))
         f.orchestrator.requestAuto()
         advanceUntilIdle()
-        assertEquals(ReplyState.WaitingForContext, f.orchestrator.state.value)
-        assertEquals(0, f.gateway.calls)
+        assertEquals(1, f.gateway.calls)
+        assertTrue(f.gateway.lastPromptSystem.contains("initial conversation opener"))
     }
 
     @Test
@@ -164,7 +164,8 @@ class ReplyOrchestratorTest {
             managedSessionAvailable = { true },
             promptBuilder = ExtensionPromptBuilder(),
             gateway = gateway,
-            resultParser = ModelResultParser()
+            resultParser = ModelResultParser(),
+            observerScope = backgroundScope
         )
         return Fixture(snapshots, sessions, gateway, orchestrator)
     }
@@ -176,7 +177,7 @@ class ReplyOrchestratorTest {
         hintText = "Message"
     )
 
-    private fun snapshot(sender: SenderClass, text: String, capturedAt: Long = 1_000L) = ContextSnapshot(
+    private fun snapshot(sender: SenderClass, text: String, capturedAt: Long = System.currentTimeMillis()) = ContextSnapshot(
         packageName = "org.example.chat",
         windowSignature = "window-1",
         conversationHint = "Alice",
@@ -197,7 +198,7 @@ class ReplyOrchestratorTest {
         composerHint = "Message",
         surface = ConversationSurface.INBOX,
         confidence = 0.9f,
-        capturedAtMillis = 1_000L
+        capturedAtMillis = System.currentTimeMillis()
     )
 
     private fun history(snapshot: ContextSnapshot) = ConversationHistory(

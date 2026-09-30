@@ -4,9 +4,11 @@ import com.socialaiassistant.keyboard.backend.BackendErrorMessages
 import com.socialaiassistant.keyboard.backend.BackendException
 import com.socialaiassistant.keyboard.backend.ManagedAiPayload
 import com.socialaiassistant.keyboard.context.ContextSnapshot
+import com.socialaiassistant.keyboard.context.ContextFreshnessPolicy
 import com.socialaiassistant.keyboard.context.ConversationKeyFactory
 import com.socialaiassistant.keyboard.context.ConversationSurface
 import com.socialaiassistant.keyboard.context.SenderClass
+import com.socialaiassistant.keyboard.context.MAX_LIVE_CHAT_MESSAGES
 import com.socialaiassistant.keyboard.ime.ImeSession
 import com.socialaiassistant.keyboard.memory.ConversationHistory
 import com.socialaiassistant.keyboard.safety.FieldSafety
@@ -33,16 +35,18 @@ class ReplyOrchestrator(
     private val gateway: AiGateway,
     private val resultParser: ModelResultParser,
     private val keyFactory: ConversationKeyFactory = ConversationKeyFactory(),
-    private val intentResolver: ConversationAiIntentResolver = ConversationAiIntentResolver()
+    private val intentResolver: ConversationAiIntentResolver = ConversationAiIntentResolver(),
+    observerScope: CoroutineScope = scope
 ) {
     private val _state = MutableStateFlow<ReplyState>(ReplyState.Hidden)
     val state: StateFlow<ReplyState> = _state.asStateFlow()
 
     private var activeJob: Job? = null
+    private var sessionObserverJob: Job? = null
     private var requestToken: Long = 0L
 
     init {
-        scope.launch {
+        sessionObserverJob = observerScope.launch {
             sessions.collectLatest { session ->
                 if (session == null || session.safety != FieldSafety.ALLOW_AI) {
                     clear()
@@ -72,15 +76,23 @@ class ReplyOrchestrator(
         _state.value = ReplyState.Hidden
     }
 
+    fun destroy() {
+        clear()
+        sessionObserverJob?.cancel()
+        sessionObserverJob = null
+    }
+
     private suspend fun processExplicit(session: ImeSession?, snapshot: ContextSnapshot?, token: Long) {
         if (session == null || session.safety != FieldSafety.ALLOW_AI) {
             publishIfCurrent(token, ReplyState.Hidden)
             return
         }
-        if (snapshot == null || snapshot.packageName != session.packageName) {
+        val packageName = session.packageName?.takeIf { it.isNotBlank() }
+        if (packageName == null || !ContextFreshnessPolicy.isUsableForPackage(snapshot, packageName)) {
             publishIfCurrent(token, ReplyState.WaitingForContext)
             return
         }
+        val safeSnapshot = requireNotNull(snapshot)
 
         val settings = settingsProvider()
         if (!settings.aiPrivacyConsent ||
@@ -99,7 +111,12 @@ class ReplyOrchestrator(
             return
         }
 
-        val intent = intentResolver.resolve(snapshot)
+        if (safeSnapshot.surface == ConversationSurface.COMMENT) {
+            publishIfCurrent(token, ReplyState.Hidden)
+            return
+        }
+
+        val intent = intentResolver.resolve(safeSnapshot)
         if (intent == ConversationAiIntent.NEEDS_CONTEXT) {
             publishIfCurrent(token, ReplyState.WaitingForContext)
             return
@@ -107,8 +124,8 @@ class ReplyOrchestrator(
 
         publishIfCurrent(token, ReplyState.Loading)
         try {
-            val history = mergeHistory(snapshot)
-            val promptRequest = buildPromptRequest(snapshot, history, settings, intent)
+            val history = mergeHistory(safeSnapshot)
+            val promptRequest = buildPromptRequest(safeSnapshot, history, settings, intent)
             val prompt = promptBuilder.build(promptRequest)
             val personalTraining = listOf(settings.personalTraining, settings.customInstruction)
                 .filter { it.isNotBlank() }
@@ -142,7 +159,28 @@ class ReplyOrchestrator(
                     publishIfCurrent(token, ReplyState.Error("AI returned an unreadable reply. Tap again to retry."))
                     return
                 }
-            publishIfCurrent(token, ReplyState.Ready(parsed.reply, fingerprint(snapshot, settings, intent)))
+            val sanitizedReply = enforceContextualAccuracy(
+                sanitizeHumanReply(parsed.reply, promptRequest.latestRecipientMessage),
+                promptRequest.latestRecipientMessage
+            )
+            val rawReply = InboxBanglaReplyPolicy.ensureBangla(
+                reply = sanitizedReply,
+                action = ManualAiAction.SMART,
+                intent = intent,
+                latestRecipientMessage = promptRequest.latestRecipientMessage
+            )
+            val rawReplies = parsed.replies.map {
+                InboxBanglaReplyPolicy.ensureBangla(
+                    reply = enforceContextualAccuracy(
+                        sanitizeHumanReply(it, promptRequest.latestRecipientMessage),
+                        promptRequest.latestRecipientMessage
+                    ),
+                    action = ManualAiAction.SMART,
+                    intent = intent,
+                    latestRecipientMessage = promptRequest.latestRecipientMessage
+                )
+            }.distinct().ifEmpty { listOf(rawReply) }
+            publishIfCurrent(token, ReplyState.Ready(reply = rawReply, replies = rawReplies, fingerprint = fingerprint(safeSnapshot, settings, intent)))
         } catch (error: CancellationException) {
             throw error
         } catch (error: BackendException) {
@@ -150,7 +188,7 @@ class ReplyOrchestrator(
         } catch (_: AiGatewayException.InvalidApiKey) {
             publishIfCurrent(token, ReplyState.NeedsApiKey)
         } catch (_: AiGatewayException.Offline) {
-            publishIfCurrent(token, ReplyState.Offline)
+            publishIfCurrent(token, localFallbackState(safeSnapshot, intent, settings))
         } catch (_: AiGatewayException.RateLimited) {
             publishIfCurrent(token, ReplyState.Error("AI rate limit reached. Please try again shortly."))
         } catch (_: AiGatewayException.InsufficientCredits) {
@@ -160,10 +198,28 @@ class ReplyOrchestrator(
         } catch (_: AiGatewayException.MalformedResponse) {
             publishIfCurrent(token, ReplyState.Error("AI returned an unreadable reply. Please retry."))
         } catch (_: AiGatewayException.ProviderFailure) {
-            publishIfCurrent(token, ReplyState.Error("AI provider is temporarily unavailable."))
+            publishIfCurrent(token, localFallbackState(safeSnapshot, intent, settings))
         } catch (_: Exception) {
             publishIfCurrent(token, ReplyState.Error("Smart Reply is temporarily unavailable."))
         }
+    }
+
+    private fun localFallbackState(
+        snapshot: ContextSnapshot,
+        intent: ConversationAiIntent,
+        settings: AppSettings
+    ): ReplyState {
+        val reply = InboxBanglaReplyPolicy.ensureBangla(
+            reply = "",
+            action = ManualAiAction.SMART,
+            intent = intent,
+            latestRecipientMessage = snapshot.latestRecipientMessage
+        )
+        return ReplyState.Ready(
+            reply = reply,
+            replies = listOf(reply),
+            fingerprint = fingerprint(snapshot, settings, intent)
+        )
     }
 
     private fun buildPromptRequest(
@@ -172,18 +228,19 @@ class ReplyOrchestrator(
         settings: AppSettings,
         intent: ConversationAiIntent
     ): PromptRequest {
-        val selected = history.messages.takeLast(settings.maxChatMessages)
-        val cachedLanguageMode = selected.asReversed()
-            .asSequence()
-            .filter { it.sender == SenderClass.RECIPIENT.name }
-            .mapNotNull { ExtensionLanguageLogic.detectLanguageMode(it.text) }
-            .firstOrNull()
-
+        val contextLimit = minOf(settings.maxChatMessages.coerceAtLeast(1), MAX_LIVE_CHAT_MESSAGES)
+        val selected = history.messages.takeLast(contextLimit)
         val interactionType = if (snapshot.surface == ConversationSurface.COMMENT) {
             InteractionType.COMMENT
         } else {
             InteractionType.INBOX
         }
+
+        val recipientMessage = snapshot.latestRecipientMessage
+            ?.takeIf { it.isNotBlank() }
+            ?: selected.asReversed()
+                .firstOrNull { it.sender == SenderClass.RECIPIENT.name }
+                ?.text
 
         return PromptRequest(
             type = interactionType,
@@ -196,14 +253,27 @@ class ReplyOrchestrator(
                     timestampHint = message.timestampHint
                 )
             },
-            latestRecipientMessage = snapshot.latestRecipientMessage,
-            cachedLanguageMode = cachedLanguageMode,
+            latestRecipientMessage = recipientMessage,
+            cachedLanguageMode = LanguageMode.BENGALI_DEFAULT,
             tonePreset = settings.tonePreset,
             customInstruction = settings.customInstruction,
             createConversationMemory = false,
             conversationIntent = intent
         )
     }
+
+    fun enforceContextualAccuracy(aiOutput: String, incoming: String?): String =
+        sanitizeHumanReply(aiOutput, incoming)
+
+    fun sanitizeHumanReply(rawResponse: String, latestIncoming: String?): String {
+        val clean = rawResponse
+            .replace(Regex("^(reply|answer|comment)\\s*:\\s*", RegexOption.IGNORE_CASE), "")
+            .trim()
+        return clean
+    }
+
+    fun ensureHumanLikeResponse(generated: String, incoming: String?): String =
+        sanitizeHumanReply(generated, incoming)
 
     private fun publishIfCurrent(token: Long, state: ReplyState) {
         if (isCurrent(token)) _state.value = state
@@ -219,7 +289,7 @@ class ReplyOrchestrator(
     ): String {
         val conversationKey = keyFactory.create(snapshot).value
         val messageHashes = snapshot.messages
-            .takeLast(settings.maxChatMessages)
+            .takeLast(minOf(settings.maxChatMessages.coerceAtLeast(1), MAX_LIVE_CHAT_MESSAGES))
             .joinToString("|") { message ->
                 "${message.sender.name}:${sha256(ExtensionLanguageLogic.cleanString(message.text, 2_000))}"
             }
