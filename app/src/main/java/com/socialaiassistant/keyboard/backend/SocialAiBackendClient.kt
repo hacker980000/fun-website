@@ -9,7 +9,10 @@ import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -37,7 +40,8 @@ class SocialAiBackendClient(
     private val deviceProof: DeviceProofManager,
     private val totalTimeoutMs: Long = 24_000L,
     private val apiBase: String = BackendConfig.API_BASE,
-    private val requestSigner: (String, String, Long, String, String) -> String = deviceProof::signRequest
+    private val requestSigner: (String, String, Long, String, String) -> String = deviceProof::signRequest,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
     suspend fun exchangeAuth(code: String): ManagedSession {
         val body = buildJsonObject {
@@ -146,27 +150,29 @@ class SocialAiBackendClient(
         productSensitive: Boolean = auth
     ): JsonObject {
         return try {
-            withTimeout(totalTimeoutMs) {
-                val finalBodyText = bodyText ?: body?.toString()
-                val builder = Request.Builder()
-                    .url(apiBase + path)
-                    .header("Content-Type", "application/json")
-                    .header("Accept", "application/json")
-                    .header("X-Extension-Channel", BackendConfig.RELEASE_CHANNEL)
-                    .header("X-Extension-Version", BackendConfig.APP_VERSION)
-                    .header("Cache-Control", "no-store")
-                if (productSensitive) builder.header(PRODUCT_HEADER, BackendConfig.PRODUCT_CODE)
-                if (auth) {
-                    val session = sessionStore.load() ?: throw BackendException("AUTH_REQUIRED", "Login required.", 401)
-                    builder.header("Authorization", "Bearer ${session.token}")
+            withContext(ioDispatcher) {
+                withTimeout(totalTimeoutMs) {
+                    val finalBodyText = bodyText ?: body?.toString()
+                    val builder = Request.Builder()
+                        .url(apiBase + path)
+                        .header("Content-Type", "application/json")
+                        .header("Accept", "application/json")
+                        .header("X-Extension-Channel", BackendConfig.RELEASE_CHANNEL)
+                        .header("X-Extension-Version", BackendConfig.APP_VERSION)
+                        .header("Cache-Control", "no-store")
+                    if (productSensitive) builder.header(PRODUCT_HEADER, BackendConfig.PRODUCT_CODE)
+                    if (auth) {
+                        val session = sessionStore.load() ?: throw BackendException("AUTH_REQUIRED", "Login required.", 401)
+                        builder.header("Authorization", "Bearer ${session.token}")
+                    }
+                    extraHeaders.forEach { (key, value) -> builder.header(key, value) }
+                    when (method.uppercase()) {
+                        "GET" -> builder.get()
+                        "POST" -> builder.post((finalBodyText ?: "{}").toRequestBody(JSON_MEDIA_TYPE))
+                        else -> error("Unsupported HTTP method")
+                    }
+                    client.newCall(builder.build()).await().use { response -> parseResponse(response) }
                 }
-                extraHeaders.forEach { (key, value) -> builder.header(key, value) }
-                when (method.uppercase()) {
-                    "GET" -> builder.get()
-                    "POST" -> builder.post((finalBodyText ?: "{}").toRequestBody(JSON_MEDIA_TYPE))
-                    else -> error("Unsupported HTTP method")
-                }
-                client.newCall(builder.build()).await().use { response -> parseResponse(response) }
             }
         } catch (error: TimeoutCancellationException) {
             throw AiGatewayException.Timeout(error)

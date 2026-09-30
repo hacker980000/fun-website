@@ -65,6 +65,23 @@ class ManualAiPromptBuilderTest {
         assertTrue(system.contains("de-escalate") || system.contains("no further romantic"))
     }
 
+
+    @Test
+    fun inbox_social_modes_force_bengali_script_even_for_english_context() {
+        val bundle = builder.build(
+            ManualAiRequest(
+                action = ManualAiAction.SMART,
+                interactionType = InteractionType.INBOX,
+                conversationIntent = ConversationAiIntent.REPLY,
+                messages = listOf(PromptMessage(SenderClass.RECIPIENT, "How was your day?")),
+                latestRecipientMessage = "How was your day?"
+            )
+        )
+        assertTrue(bundle.system.contains("FORCED BENGALI INBOX"))
+        assertTrue(bundle.system.contains("final response MUST be natural Bengali", ignoreCase = true))
+        assertTrue(bundle.system.contains("up to 10 recent messages"))
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun rewrite_requires_non_empty_draft() {
         builder.build(ManualAiRequest(action = ManualAiAction.REWRITE, draftText = ""))

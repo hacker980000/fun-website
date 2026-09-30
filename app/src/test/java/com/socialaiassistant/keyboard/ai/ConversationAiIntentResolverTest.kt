@@ -34,11 +34,11 @@ class ConversationAiIntentResolverTest {
         assertEquals(ConversationAiIntent.START, resolver.resolve(snapshot(emptyList(), "Jaan")))
     }
 
-    @Test fun empty_history_without_hint_needs_context() {
-        assertEquals(ConversationAiIntent.NEEDS_CONTEXT, resolver.resolve(snapshot(emptyList(), null)))
+    @Test fun empty_inbox_without_hint_starts_new_conversation() {
+        assertEquals(ConversationAiIntent.START, resolver.resolve(snapshot(emptyList(), null)))
     }
 
-    @Test fun unknown_only_history_never_becomes_reply() {
+    @Test fun unknown_only_history_fails_closed() {
         val snapshot = snapshot(listOf(ContextMessage(SenderClass.UNKNOWN, "something")), null)
         assertEquals(ConversationAiIntent.NEEDS_CONTEXT, resolver.resolve(snapshot))
     }

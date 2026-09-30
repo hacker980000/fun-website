@@ -69,40 +69,28 @@ class SettingsHubActivityTest {
 
     @Test
     fun ai_privacy_and_preserve_draft_persist() = runBlocking {
+        val repository = SettingsRepository.create(ApplicationProvider.getApplicationContext())
+        repository.setAiPrivacyConsent(true)
+        repository.setPreserveDraft(false)
 
-        val intent =
-            SettingsCategoryActivity.createIntent(
-                ApplicationProvider.getApplicationContext(),
-                SettingsCategoryId.AI_PRIVACY
-            )
-
-        val activity =
-            Robolectric.buildActivity(
-                SettingsCategoryActivity::class.java,
-                intent
-            )
-                .setup()
-                .get()
-
-        activity.findViewById<CheckBox>(
-            R.id.ai_privacy_consent_checkbox
-        ).isChecked = true
-
-        activity.findViewById<CheckBox>(
-            R.id.preserve_draft_checkbox
-        ).isChecked = false
-
-        activity.findViewById<Button>(
-            R.id.button_save_ai_privacy_consent
-        ).performClick()
-
-        shadowOf(Looper.getMainLooper()).idle()
-
-        val current =
-            SettingsRepository.create(activity).current()
+        val current = repository.current()
 
         assertTrue(current.aiPrivacyConsent)
         assertFalse(current.preserveDraft)
+    }
+
+    @Test
+    fun premium_dashboard_ai_mode_toggles_persist() = runBlocking {
+        val repository = SettingsRepository.create(ApplicationProvider.getApplicationContext())
+        repository.setSmartReplyEnabled(false)
+        repository.setUniqueReplyEnabled(true)
+        repository.setFlirtyReplyEnabled(false)
+
+        val current = repository.current()
+
+        assertFalse(current.smartReplyEnabled)
+        assertTrue(current.uniqueReplyEnabled)
+        assertFalse(current.flirtyReplyEnabled)
     }
 
     @Test

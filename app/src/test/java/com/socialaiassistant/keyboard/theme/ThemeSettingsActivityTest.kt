@@ -7,6 +7,8 @@ import android.widget.Spinner
 import com.socialaiassistant.keyboard.R
 import com.socialaiassistant.keyboard.ThemeSettingsActivity
 import androidx.test.core.app.ApplicationProvider
+import com.socialaiassistant.keyboard.SettingsCategoryActivity
+import com.socialaiassistant.keyboard.settingsui.SettingsCategoryId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -18,13 +20,11 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class ThemeSettingsActivityTest {
     @Test
-    fun activity_renders_four_premium_pack_choices_and_seven_surface_customizers() {
+    fun activity_renders_four_premium_pack_choices_without_per_keyboard_customizer() {
         val activity = Robolectric.buildActivity(ThemeSettingsActivity::class.java).setup().get()
         val packs = activity.findViewById<LinearLayout>(R.id.theme_pack_container)
-        val surfaces = activity.findViewById<LinearLayout>(R.id.theme_surface_container)
         val scope = activity.findViewById<Spinner>(R.id.background_scope_spinner)
         assertEquals(4, packs.childCount)
-        assertEquals(7, surfaces.childCount)
         assertEquals(3, scope.adapter.count)
     }
 
@@ -56,8 +56,12 @@ class ThemeSettingsActivityTest {
     }
 
     @Test
-    fun main_screen_has_theme_settings_entry() {
-        val activity = Robolectric.buildActivity(com.socialaiassistant.keyboard.MainActivity::class.java).setup().get()
+    fun theme_appearance_category_has_theme_settings_entry() {
+        val intent = SettingsCategoryActivity.createIntent(
+            ApplicationProvider.getApplicationContext(),
+            SettingsCategoryId.THEME_APPEARANCE
+        )
+        val activity = Robolectric.buildActivity(SettingsCategoryActivity::class.java, intent).setup().get()
         assertNotNull(activity.findViewById<Button>(R.id.button_theme_settings))
     }
 }
