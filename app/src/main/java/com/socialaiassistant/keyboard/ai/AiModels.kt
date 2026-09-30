@@ -43,6 +43,7 @@ data class PromptBundle(
 
 data class ParsedAiResult(
     val reply: String,
+    val replies: List<String> = listOf(reply),
     val category: String? = null,
     val confidence: Double = 0.5,
     val conversationMemory: String? = null
