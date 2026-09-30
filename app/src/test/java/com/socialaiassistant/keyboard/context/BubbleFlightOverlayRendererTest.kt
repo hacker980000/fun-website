@@ -6,7 +6,10 @@ import com.socialaiassistant.keyboard.ime.BubbleFlightEditorToken
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class BubbleFlightOverlayRendererTest {
     @Test fun cancelUnknownEditorDoesNotCreateViews() {
         val root = FrameLayout(ApplicationProvider.getApplicationContext())
