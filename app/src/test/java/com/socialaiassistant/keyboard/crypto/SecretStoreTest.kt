@@ -5,7 +5,10 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class SecretStoreTest {
     @Test
     fun openrouter_key_round_trips_without_plaintext_backing_storage() {
@@ -43,7 +46,6 @@ class SecretStoreTest {
         assertTrue(backing.values.isEmpty())
         assertNull(store.configuredMask())
     }
-
 
     @Test
     fun personal_training_is_encrypted_and_isolated_per_managed_account() {
